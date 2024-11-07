@@ -6,14 +6,26 @@ on:
     
 jobs:
   build-release:
-    name: Check licenses of dependencies
+    name: Build a binary release
     runs-on: ubuntu-24.04
     steps:
       - name: Clone code
         uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/workflows/env
-      - name: Build a binary
-        run: |
-          make agent
-
+      - name: Build a builder docker image
+        run: make docker-image
+      - name: Build the agent binary
+        run: make agent
+      - name: Compute agent binary hash
+        id: hash
+        run: echo "::set-output name=binary_hash::$(sha256sum ebpf-profiler | cut -d ' ' -f 1)"
+      - name: Create a github release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ebpf-profiler
+          body: |
+            The binary was built from commit ${{ github.sha }}.
+            The SHA256 hash of the compiled binary is ${{ steps.hash.outputs.binary_hash }}.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
