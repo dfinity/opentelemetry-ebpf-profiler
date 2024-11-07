@@ -1,0 +1,19 @@
+name: build-release
+
+on:
+  push:
+    branches: [main]
+    
+jobs:
+  build-release:
+    name: Check licenses of dependencies
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Clone code
+        uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/workflows/env
+      - name: Build a binary
+        run: |
+          make agent
+
