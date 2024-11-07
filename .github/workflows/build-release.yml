@@ -26,10 +26,14 @@ jobs:
       - name: Compute agent binary hash
         id: hash
         run: echo "::set-output name=binary_hash::$(sha256sum ebpf-profiler | cut -d ' ' -f 1)"
+      - name: Short release tag hash
+        id: taghash
+        run: echo "::set-output name=tag_hash::$(echo ${{ steps.hash.outputs.binary_hash }} | cut -c -7)"
       - name: Create a github release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: ebpf-profiler
+          tag_name: ${{ steps.taghash.outputs.tag_hash }}
           body: |
             The binary was built from commit ${{ github.sha }}.
             The SHA256 hash of the compiled binary is ${{ steps.hash.outputs.binary_hash }}.
